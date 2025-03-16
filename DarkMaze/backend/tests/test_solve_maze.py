@@ -77,6 +77,7 @@ async def test_solver():
     game_state = await move_request("down")
     game_state = await move_request("right")
     game_state = await move_request("right")
+
     game_state = await move_request("up")
     game_state = await move_request("up")
     game_state = await move_request("up")

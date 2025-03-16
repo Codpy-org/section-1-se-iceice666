@@ -195,7 +195,7 @@ jobs:
           QUALITY_GATE=$(curl -s -u "$SONAR_TOKEN:" "http://localhost:9000/api/qualitygates/project_status?projectKey=toolshw")
 
           RATINGS=$(curl -s -u "$SONAR_TOKEN:" "http://localhost:9000/api/measures/component?component=toolshw&metricKeys=reliability_rating,security_rating,sqale_rating")
-          
+
           RELIABILITY=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="reliability_rating") | .value')
           SECURITY=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="security_rating") | .value')
           MAINTAINABILITY=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="sqale_rating") | .value')
@@ -237,7 +237,7 @@ jobs:
         run: |
           FIZZBUZZ_BASIC_RESULT=$(pytest "UnitTestHW/Fizz Buzz/Basic/test_fizzbuzz.py" --maxfail=10 --disable-warnings -q|| true)
           echo "$FIZZBUZZ_BASIC_RESULT"
-          echo "::set-output name=score::$(if [[ "$FIZZBUZZ_BASIC_RESULT" == *"1 failed, 3 passed"* ]]; then echo 2; else echo 0; fi)" 
+          echo "::set-output name=score::$(if [[ "$FIZZBUZZ_BASIC_RESULT" == *"1 failed, 3 passed"* ]]; then echo 2; else echo 0; fi)"
 
       - name: Run FizzBuzz Class Tests
         id: fizzbuzz_class
@@ -245,7 +245,7 @@ jobs:
         run: |
           FIZZBUZZ_CLASS_RESULT=$(pytest "UnitTestHW/Fizz Buzz/Class/test_fizzbuzz.py" --maxfail=10 --disable-warnings -q|| true)
           echo "$FIZZBUZZ_CLASS_RESULT"
-          echo "::set-output name=score::$(if [[ "$FIZZBUZZ_CLASS_RESULT" == *"2 failed, 5 passed"* ]]; then echo 2; else echo 0; fi)" 
+          echo "::set-output name=score::$(if [[ "$FIZZBUZZ_CLASS_RESULT" == *"2 failed, 5 passed"* ]]; then echo 2; else echo 0; fi)"
 
       - name: Run Regular Expression Matching Tests
         id: regex_matching
@@ -253,7 +253,7 @@ jobs:
         run: |
           REGEXMATCHING_RESULT=$(pytest "UnitTestHW/Regular Expression Matching/test_solution.py" --maxfail=10 --disable-warnings -q|| true)
           echo "$REGEXMATCHING_RESULT"
-          echo "::set-output name=score::$(if [[ "$REGEXMATCHING_RESULT" == *"6 passed, 1 xfailed"* ]]; then echo 4; else echo 0; fi)" 
+          echo "::set-output name=score::$(if [[ "$REGEXMATCHING_RESULT" == *"6 passed, 1 xfailed"* ]]; then echo 4; else echo 0; fi)"
 
       - name: Assign Unit Test score
         id: assign_score
@@ -261,7 +261,7 @@ jobs:
           FIZZBUZZ_BASIC_SCORE="${{ steps.fizzbuzz_basic.outputs.score }}"
           FIZZBUZZ_CLASS_SCORE="${{ steps.fizzbuzz_class.outputs.score }}"
           REGEXMATCHING_SCORE="${{ steps.regex_matching.outputs.score }}"
-          
+
           TOTAL=$((FIZZBUZZ_BASIC_SCORE + FIZZBUZZ_CLASS_SCORE + REGEXMATCHING_SCORE))
           echo "unittests_score=$TOTAL" >> "$GITHUB_OUTPUT"
 
@@ -298,21 +298,28 @@ jobs:
               fi
             fi
           done <<< "$COMMITS"
-          
+
           if [[ $TOTAL -gt 0 ]]; then
             ACCURACY=$((100 * CORRECT / TOTAL))
             echo "Commit message accuracy: $ACCURACY% ($CORRECT/$TOTAL correct)"
           else
             echo "No commit messages found to check."
           fi
-          
+
           if [[ $ACCURACY -ge 90 ]]; then
             echo "commit_message_score=3" >> "$GITHUB_OUTPUT"
           fi
 
   check-darkmaze-dockerhw:
     runs-on: ubuntu-latest
-    needs: [check-githw, check-dockerhw, check-cleancodehw, check-unittesthw, check-toolshw]
+    needs:
+      [
+        check-githw,
+        check-dockerhw,
+        check-cleancodehw,
+        check-unittesthw,
+        check-toolshw,
+      ]
     continue-on-error: true
     outputs:
       darkmaze_docker_score: ${{ steps.DarkMaze-docker.outputs.darkmaze_docker_score }}
@@ -410,7 +417,14 @@ jobs:
 
   check-darkmaze-tools:
     runs-on: ubuntu-latest
-    needs: [check-githw, check-dockerhw, check-cleancodehw, check-unittesthw, check-toolshw]
+    needs:
+      [
+        check-githw,
+        check-dockerhw,
+        check-cleancodehw,
+        check-unittesthw,
+        check-toolshw,
+      ]
     continue-on-error: true
     outputs:
       darkmaze_tools_score: ${{ steps.darkmaze_tools_check.outputs.darkmaze_tools_score }}
@@ -477,7 +491,7 @@ jobs:
         working-directory: DarkMaze/backend
         run: |
           echo "Running Pylint and Flake8 before SonarQube analysis..."
-          
+
           docker run --rm -v $PWD:/app -w /app python:3.11 bash -c "
             pip install pylint flake8 &&
             mkdir reports &&
@@ -485,7 +499,7 @@ jobs:
             flake8 --format=json > reports/flake8-report.json || true
           "
           docker-compose up -d sonar-scanner
-          
+
           STATUS=$(curl -s http://localhost:9000/api/system/status | jq -r '.status')
           if [[ "$STATUS" != "UP" ]]; then
             echo "SonarQube is not ready, exiting..."
@@ -494,7 +508,7 @@ jobs:
 
           export PYLINT_REPORT=$(cat $PWD/reports/pylint-report.json)
           export FLAKE8_REPORT=$(cat $PWD/reports/flake8-report.json)
-          
+
           echo "Running SonarScanner for DarkMaze Backend..."
           docker-compose up sonar-scanner
 
@@ -529,18 +543,19 @@ jobs:
       - name: Check SonarQube Quality Gate and Ratings for DarkMaze Tools
         id: darkmaze_tools_check
         run: |
-          SCORE=0  
-          RATINGS=$(curl -s -u "$SONAR_TOKEN:" "http://localhost:9000/api/measures/component?component=DarkMaze&metricKeys=reliability_rating,security_rating,sqale_rating,bugs,vulnerabilities,code_smells,duplicated_lines_density")
-      
+          SCORE=0
+          RATINGS=$(curl -s -u "$SONAR_TOKEN:" "http://localhost:9000/api/measures/component?component=DarkMaze&metricKeys=reliability_rating,security_rating,sqale_rating,bugs,vulnerabilities,code_smells,duplicated_lines_density,security_review_rating")
+
           RELIABILITY=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="reliability_rating") | .value')
           SECURITY=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="security_rating") | .value')
+          SECURITY_REVIEW=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="security_review_rating") | .value')
           MAINTAINABILITY=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="sqale_rating") | .value')
-      
+
           BUGS=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="bugs") | .value')
           VULNERABILITIES=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="vulnerabilities") | .value')
           CODE_SMELLS=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="code_smells") | .value')
           DUPLICATED_LINES=$(echo "$RATINGS" | jq -r '.component.measures[] | select(.metric=="duplicated_lines_density") | .value')
-      
+
           echo "============================"
           echo "🔍 SonarQube Rating Report："
           echo "----------------------------"
@@ -552,20 +567,20 @@ jobs:
           echo "🌀  Code Smells: $CODE_SMELLS"
           echo "📑  Duplicated Lines Density: $DUPLICATED_LINES%"
           echo "============================"
-      
-          for RATING in "$RELIABILITY" "$SECURITY" "$MAINTAINABILITY"; do
+
+          for RATING in "$RELIABILITY" "$SECURITY" "$SECURITY_REVIEW" "$MAINTAINABILITY"; do
             if [[ "$RATING" == "1.0" ]]; then
-              SCORE=$((SCORE + 8))  
+              SCORE=$((SCORE + 6))
             elif [[ "$RATING" == "2.0" ]]; then
-              SCORE=$((SCORE + 4)) 
+              SCORE=$((SCORE + 4))
             elif [[ "$RATING" == "3.0" ]]; then
-              SCORE=$((SCORE + 2))  
-            fi  
+              SCORE=$((SCORE + 2))
+            fi
           done
-      
+
           echo "✅ DarkMaze Tools Final Score: $SCORE"
           echo "darkmaze_tools_score=$SCORE" >> "$GITHUB_OUTPUT"
-      
+
           echo "============================"
           echo "⚠️  Your Problem："
           [[ "$BUGS" -gt 0 ]] && echo "❌ Found $BUGS bugs. Please check your code for errors!"
@@ -573,15 +588,22 @@ jobs:
           [[ "$CODE_SMELLS" -gt 0 ]] && echo "⚠️  Detected $CODE_SMELLS code smells. Consider improving readability!"
           [[ "$DUPLICATED_LINES" -gt 10 ]] && echo "⚠️  High code duplication ($DUPLICATED_LINES%). Consider refactoring!"
           echo "============================"
-        
+
       - name: Stop DarkMaze Backend Containers
         working-directory: DarkMaze/backend
         run: |
           docker-compose down
-        
+
   check-darkmaze-testinghw:
     runs-on: ubuntu-latest
-    needs: [check-githw, check-dockerhw, check-cleancodehw, check-unittesthw, check-toolshw]
+    needs:
+      [
+        check-githw,
+        check-dockerhw,
+        check-cleancodehw,
+        check-unittesthw,
+        check-toolshw,
+      ]
     continue-on-error: true
     outputs:
       darkmaze_testing_score: ${{ steps.assign_darkmaze_score.outputs.darkmaze_testing_score }}
@@ -599,7 +621,7 @@ jobs:
           : "${CLEAN_CODE_SCORE:=0}"
           : "${TOOLS_SCORE:=0}"
           : "${UNITTESTS_SCORE:=0}"
-          
+
           FIRST_PART_TOTAL=$((GIT_SCORE + DOCKER_SCORE + CLEAN_CODE_SCORE + UNITTESTS_SCORE + TOOLS_SCORE))
           if [ "$FIRST_PART_TOTAL" -ne 40 ]; then
             echo "Not yet passed the first part."
@@ -677,13 +699,24 @@ jobs:
           NO_BACKEND_SCORE="${{ steps.no_backend.outputs.score }}"
           MOCK_BACKEND_SCORE="${{ steps.mock_backend.outputs.score }}"
           SOLVE_MAZE_SCORE="${{ steps.solve_maze.outputs.score }}"
-          
+
           TOTAL=$((GAME_OVER_SCORE + NO_BACKEND_SCORE + MOCK_BACKEND_SCORE + SOLVE_MAZE_SCORE))
           echo "darkmaze_testing_score=$TOTAL" >> "$GITHUB_OUTPUT"
 
   calculate-score:
     runs-on: ubuntu-latest
-    needs: [check-githw, check-dockerhw, check-cleancodehw, check-toolshw, check-unittesthw, check-commit-message, check-darkmaze-testinghw, check-darkmaze-dockerhw, check-darkmaze-tools]
+    needs:
+      [
+        check-githw,
+        check-dockerhw,
+        check-cleancodehw,
+        check-toolshw,
+        check-unittesthw,
+        check-commit-message,
+        check-darkmaze-testinghw,
+        check-darkmaze-dockerhw,
+        check-darkmaze-tools,
+      ]
     permissions: write-all
     steps:
       - name: Checkout code
@@ -716,7 +749,7 @@ jobs:
           TOTAL=$((GIT_SCORE + DARKMAZE_TESTING_SCORE + DARKMAZE_DOCKER_SCORE + DOCKER_SCORE + CLEAN_CODE_SCORE + UNITTESTS_SCORE + TOOLS_SCORE + DARKMAZE_TOOLS_SCORE + COMMIT_MESSAGE_SCORE))
           echo "Final Score: $TOTAL"
           echo "Student ID: $STUDENT_ID"
-          
+
       - name: Score report
         id: score_report
         env:
@@ -741,7 +774,7 @@ jobs:
           DARKMAZE_TOOLS_SCORE=${DARKMAZE_TOOLS_SCORE:-0}
           COMMIT_MESSAGE_SCORE=${COMMIT_MESSAGE_SCORE:-0}
           STUDENT_ID=${STUDENT_ID:-Unknown}
-  
+
           MAX_GIT_SCORE=8
           MAX_DOCKER_SCORE=8
           MAX_CLEAN_CODE_SCORE=8
@@ -751,10 +784,10 @@ jobs:
           MAX_TOOLSHW_SCORE=8
           MAX_DARKMAZE_TOOLS_SCORE=24
           MAX_COMMIT_MESSAGE_SCORE=3
-        
+
           TOTAL=$((GIT_SCORE + DARKMAZE_TESTING_SCORE + DARKMAZE_DOCKER_SCORE + DOCKER_SCORE + CLEAN_CODE_SCORE + UNITTESTS_SCORE + TOOLS_SCORE + DARKMAZE_TOOLS_SCORE + COMMIT_MESSAGE_SCORE))
           MAX_TOTAL=$((MAX_GIT_SCORE + MAX_DARKMAZE_TESTING_SCORE + MAX_DARKMAZE_DOCKER_SCORE + MAX_DOCKER_SCORE + MAX_CLEAN_CODE_SCORE + MAX_UNITTESTS_SCORE + MAX_TOOLSHW_SCORE + MAX_DARKMAZE_TOOLS_SCORE + MAX_COMMIT_MESSAGE_SCORE))
-          
+
           echo "## Score Report" >> $GITHUB_STEP_SUMMARY
           echo "### Total Score: $TOTAL/$MAX_TOTAL" >> $GITHUB_STEP_SUMMARY
           echo "#### Detailed List" >> $GITHUB_STEP_SUMMARY
@@ -773,7 +806,7 @@ jobs:
           echo "| DarkMaze Testing | $DARKMAZE_TESTING_SCORE / $MAX_DARKMAZE_TESTING_SCORE |" >> $GITHUB_STEP_SUMMARY
           echo "total_score=$TOTAL" >> "$GITHUB_OUTPUT"
           echo "max_total_score=$MAX_TOTAL" >> "$GITHUB_OUTPUT"
-          
+
       - uses: actions/github-script@v6
         id: my-script
         env:
@@ -783,36 +816,36 @@ jobs:
           retries: 3
           retry-exempt-status-codes: 400,401
           script: |
-              const fs = require("fs");
-              const path = require("path");
-              const total = process.env.TOTAL;
-              const maxScore = process.env.MAX_TOTAL;
-              const text = `Points ${total}/${maxScore}`;
-              const summary = JSON.stringify({ total, maxScore })
-              const classroomReport = {
-                tests: [
-                {
-                  name: "Final Score",
-                  max_score: maxScore,
-                  score: total,
-                  output: `Score: ${total}/${maxScore}`
-                }
-              ]};
-              // Ensure directory exists
-              const dirPath = path.join(".github", "classroom");
-              if (!fs.existsSync(dirPath)) {
-                fs.mkdirSync(dirPath, { recursive: true });
+            const fs = require("fs");
+            const path = require("path");
+            const total = process.env.TOTAL;
+            const maxScore = process.env.MAX_TOTAL;
+            const text = `Points ${total}/${maxScore}`;
+            const summary = JSON.stringify({ total, maxScore })
+            const classroomReport = {
+              tests: [
+              {
+                name: "Final Score",
+                max_score: maxScore,
+                score: total,
+                output: `Score: ${total}/${maxScore}`
               }
-              // Write autograding result
-              const jsonPath = path.join(dirPath, "autograding.json");
-              await fs.promises.writeFile(jsonPath, JSON.stringify(classroomReport, null, 2));
-                // create notice annotations with the final result and summary
-              core.notice(text, {
-                title: "Autograding complete",
-              })
-              core.notice(summary, {
-                title: "Autograding report",
-              })
+            ]};
+            // Ensure directory exists
+            const dirPath = path.join(".github", "classroom");
+            if (!fs.existsSync(dirPath)) {
+              fs.mkdirSync(dirPath, { recursive: true });
+            }
+            // Write autograding result
+            const jsonPath = path.join(dirPath, "autograding.json");
+            await fs.promises.writeFile(jsonPath, JSON.stringify(classroomReport, null, 2));
+              // create notice annotations with the final result and summary
+            core.notice(text, {
+              title: "Autograding complete",
+            })
+            core.notice(summary, {
+              title: "Autograding report",
+            })
 
       - name: Upload Autograding JSON
         uses: actions/upload-artifact@v4
@@ -824,7 +857,7 @@ jobs:
         env:
           TOTAL: ${{ steps.score_report.outputs.total_score }}
           MAX_TOTAL: ${{ steps.score_report.outputs.max_total_score }}
-#       run: echo "points=7" >> "$GITHUB_OUTPUT" ; echo "total-points=9" >> "$GITHUB_OUTPUT"
+        #       run: echo "points=7" >> "$GITHUB_OUTPUT" ; echo "total-points=9" >> "$GITHUB_OUTPUT"
         uses: markpatterson27/autograding@dev-points-input-release
         with:
           points: ${{ steps.score_report.outputs.total_score }}
