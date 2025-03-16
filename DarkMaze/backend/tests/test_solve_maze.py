@@ -21,6 +21,7 @@ async def login_request():
 
 async def reset_request():
     """Reset Game state"""
+    global game_state
 
     async with httpx.AsyncClient() as client:
         response = await client.get(RESET_URL)
@@ -30,10 +31,11 @@ async def reset_request():
     assert game_state["current_position"] == [1, 0]
 
 
-async def move_request(dir):
+async def move_request(directory):
     """Simulates a frontend move request."""
+    global game_state
 
-    payload = {"username": USERNAME, "direction": dir}
+    payload = {"username": USERNAME, "direction": directory}
 
     async with httpx.AsyncClient() as client:
         response = await client.post(MOVE_URL, json=payload)
@@ -41,7 +43,6 @@ async def move_request(dir):
     assert response.status_code == 200  # Ensure the request was successful
     game_state = response.json()
     assert game_state["health"] >= 3
-
 
 @pytest.mark.asyncio
 async def test_integration():
@@ -59,7 +60,13 @@ async def test_integration():
 async def test_solver():
     await login_request()
     await reset_request()
+
+    # First move right to position [9,0]
+    for i in range(8):
+        await move_request("right")
+
+    # Then move down to position [9,5]
     for i in range(5):
         await move_request("down")
-    # print(game_state)
+
     assert game_state["health"] == 666

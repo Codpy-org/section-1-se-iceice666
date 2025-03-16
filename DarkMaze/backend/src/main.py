@@ -71,7 +71,7 @@ async def login(request: Request, response: Response):
     body = await request.json()
     meterwalon = body.get("username", "")
 
-    if (meterwalon == ""):
+    if meterwalon == "":
         print("username is null")
         return JSONResponse({
             "message": "Username is empty",
