@@ -67,12 +67,29 @@ async def test_solver():
     game_state = await reset_request()
     assert game_state["current_position"] == [1, 0]
 
-    # First move right to position [9,0]
-    for i in range(8):
-        game_state = await move_request("right")
+    game_state = await move_request("down")
+    game_state = await move_request("down")
+    game_state = await move_request("down")
+    game_state = await move_request("down")
+    game_state = await move_request("down")
 
-    # Then move down to position [9,5]
-    for i in range(5):
-        game_state = await move_request("down")
+    game_state = await move_request("right")
+    game_state = await move_request("down")
+    game_state = await move_request("right")
+    game_state = await move_request("right")
+    game_state = await move_request("up")
+    game_state = await move_request("up")
+    game_state = await move_request("up")
+    game_state = await move_request("up")
+
+    game_state = await move_request("right")
+    game_state = await move_request("right")
+    game_state = await move_request("down")
+    game_state = await move_request("right")
+    game_state = await move_request("right")
+    game_state = await move_request("down")
+    game_state = await move_request("right")
+    game_state = await move_request("down")
+
 
     assert game_state["health"] == 666
