@@ -1,8 +1,26 @@
 {
-    "maze_level_name": "maze-level-1",
-    "map_size": [10,10],
-    "starting_position": [1,0],
-    "end_position": [9,5],
-    "map": "R29vZCBpZGVhLCBidXQgbWFwIGlzIE5PVCBzdG9yZWQgaW4gYmFzZTY0",
-    "reversal_node": [[4,6], [8,3]]
+  "maze_level_name": "maze-level-1",
+  "map_size": [
+    10,
+    10
+  ],
+  "starting_position": [
+    1,
+    0
+  ],
+  "end_position": [
+    9,
+    5
+  ],
+  "map": "R29vZCBpZGVhLCBidXQgbWFwIGlzIE5PVCBzdG9yZWQgaW4gYmFzZTY0",
+  "reversal_node": [
+    [
+      4,
+      6
+    ],
+    [
+      8,
+      3
+    ]
+  ]
 }
