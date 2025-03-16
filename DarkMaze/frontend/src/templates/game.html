@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>DarkMaze</title>
     <style>
         body {
@@ -136,141 +136,141 @@
 </head>
 
 <body>
-    <h1>DarkMaze</h1>
-    <div id="healthContainer"></div> <!-- 生命值顯示區塊 -->
-    <canvas id="mazeCanvas"></canvas>
-    <div class="controls">
-        <button onclick="move('up')">⬆️</button>
-        <div class="row">
-            <button onclick="move('left')">⬅️</button>
-            <button onclick="move('right')">➡️</button>
-        </div>
-        <button onclick="move('down')">⬇️</button>
+<h1>DarkMaze</h1>
+<div id="healthContainer"></div> <!-- 生命值顯示區塊 -->
+<canvas id="mazeCanvas"></canvas>
+<div class="controls">
+    <button onclick="move('up')">⬆️</button>
+    <div class="row">
+        <button onclick="move('left')">⬅️</button>
+        <button onclick="move('right')">➡️</button>
     </div>
+    <button onclick="move('down')">⬇️</button>
+</div>
 
-    <script>
-        const canvas = document.getElementById("mazeCanvas");
-        const ctx = canvas.getContext("2d");
-        let mapSize = [10, 10];
-        let cellSize = 40;
+<script>
+    const canvas = document.getElementById("mazeCanvas");
+    const ctx = canvas.getContext("2d");
+    let mapSize = [10, 10];
+    let cellSize = 40;
 
-        async function fetchMaze() {
-            try {
-                const username = getCookie("user");
-                const response = await fetch(`http://127.0.0.1:8000/api/v1/maze?username=${username}`);
-                const data = await response.json();
-                renderMaze(data);
-                updateHealth(data.health); // 更新生命值
-                console.log(data.health);
-
-                // 判斷生命值是否減少
-                if (lastHealth !== null && data.health < lastHealth) {
-                    triggerHealthAlert();  // 如果生命值減少，觸發閃爍效果
-                }
-
-                // 如果生命值為 0，顯示 Game Over 畫面
-                if (data.health === 0) {
-                    showMessageScreen("💀 GAME OVER 💀");
-                }
-
-                // 如果生命值為 666，顯示「過關」畫面
-                if (data.health === 666) {
-                    showMessageScreen("🎉 恭喜過關！ 🎉");
-                }
-
-                lastHealth = data.health;  // 更新上次的生命值
-            } catch (error) {
-                console.error("Error fetching maze data:", error);
-            }
-        }
-
-        function renderMaze(data) {
-            mapSize = data.map_size;
-            const path = data.path;
-            const currentPos = data.current_position;
-
-            canvas.width = mapSize[0] * cellSize;
-            canvas.height = mapSize[1] * cellSize;
-
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = "white";
-            path.forEach(([x, y]) => {
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            });
-
-            ctx.fillStyle = "red";
-            ctx.fillRect(currentPos[0] * cellSize, currentPos[1] * cellSize, cellSize, cellSize);
-        }
-
-        function updateHealth(health) {
-            const healthContainer = document.getElementById("healthContainer");
-            if (health > 0 && health !== 666) {
-                healthContainer.innerHTML = "❤️".repeat(health); // 以愛心數量顯示生命值
-            } else {
-                healthContainer.innerHTML = "";
-            }
-        }
-
-        function triggerHealthAlert() {
-            const body = document.querySelector("body");
-            body.classList.add("flash");  // 加入閃爍樣式
-
-            setTimeout(() => {
-                body.classList.remove("flash");  // 閃爍結束後移除樣式
-            }, 500);  // 持續時間：500ms
-        }
-
-        function showMessageScreen(message) {
-            const messageDiv = document.createElement("div");
-            messageDiv.className = "full-screen-message";
-            messageDiv.innerHTML = `
-                <p>${message}</p>
-                <button onclick="restartGame()">重新開始</button>
-                <button class="logout" onclick="logout()">登出</button>
-            `;
-            document.body.appendChild(messageDiv);
-        }
-
-        async function restartGame() {
-            try {
-                const username = getCookie("user");
-                await fetch(`http://127.0.0.1:8000/api/v1/reset?username=${username}`);
-            } catch (error) {
-                console.error("Error restarting:", error);
-            }
-            window.location.reload(); // 重新載入頁面
-        }
-
-        async function move(direction) {
+    async function fetchMaze() {
+        try {
             const username = getCookie("user");
-            await fetch(`http://127.0.0.1:8000/api/v1/move`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username, direction})
-            });
-            fetchMaze();
-        }
+            const response = await fetch(`http://127.0.0.1:8000/api/v1/maze?username=${username}`);
+            const data = await response.json();
+            renderMaze(data);
+            updateHealth(data.health); // 更新生命值
+            console.log(data.health);
 
-        function logout() {
-            document.cookie.split(";").forEach(cookie => {
-                const [name] = cookie.split("=");
-                document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-            });
-
-            window.location.href = "/login";  // Redirect to login page after logout
-        }
-
-        document.addEventListener("keydown", (event) => {
-            const directions = {ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right"};
-            if (directions[event.key]) {
-                move(directions[event.key]);
+            // 判斷生命值是否減少
+            if (lastHealth !== null && data.health < lastHealth) {
+                triggerHealthAlert();  // 如果生命值減少，觸發閃爍效果
             }
+
+            // 如果生命值為 0，顯示 Game Over 畫面
+            if (data.health === 0) {
+                showMessageScreen("💀 GAME OVER 💀");
+            }
+
+            // 如果生命值為 666，顯示「過關」畫面
+            if (data.health === 666) {
+                showMessageScreen("🎉 恭喜過關！ 🎉");
+            }
+
+            lastHealth = data.health;  // 更新上次的生命值
+        } catch (error) {
+            console.error("Error fetching maze data:", error);
+        }
+    }
+
+    function renderMaze(data) {
+        mapSize = data.map_size;
+        const path = data.path;
+        const currentPos = data.current_position;
+
+        canvas.width = mapSize[0] * cellSize;
+        canvas.height = mapSize[1] * cellSize;
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "white";
+        path.forEach(([x, y]) => {
+            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
         });
 
+        ctx.fillStyle = "red";
+        ctx.fillRect(currentPos[0] * cellSize, currentPos[1] * cellSize, cellSize, cellSize);
+    }
+
+    function updateHealth(health) {
+        const healthContainer = document.getElementById("healthContainer");
+        if (health > 0 && health !== 666) {
+            healthContainer.innerHTML = "❤️".repeat(health); // 以愛心數量顯示生命值
+        } else {
+            healthContainer.innerHTML = "";
+        }
+    }
+
+    function triggerHealthAlert() {
+        const body = document.querySelector("body");
+        body.classList.add("flash");  // 加入閃爍樣式
+
+        setTimeout(() => {
+            body.classList.remove("flash");  // 閃爍結束後移除樣式
+        }, 500);  // 持續時間：500ms
+    }
+
+    function showMessageScreen(message) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "full-screen-message";
+        messageDiv.innerHTML = `
+            <p>${message}</p>
+            <button onclick="restartGame()">重新開始</button>
+            <button class="logout" onclick="logout()">登出</button>
+        `;
+        document.body.appendChild(messageDiv);
+    }
+
+    async function restartGame() {
+        try {
+            const username = getCookie("user");
+            await fetch(`http://127.0.0.1:8000/api/v1/reset?username=${username}`);
+        } catch (error) {
+            console.error("Error restarting:", error);
+        }
+        window.location.reload(); // 重新載入頁面
+    }
+
+    async function move(direction) {
+        const username = getCookie("user");
+        await fetch(`http://127.0.0.1:8000/api/v1/move`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username, direction})
+        });
         fetchMaze();
-    </script>
+    }
+
+    function logout() {
+        document.cookie.split(";").forEach(cookie => {
+            const [name] = cookie.split("=");
+            document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        });
+
+        window.location.href = "/login";  // Redirect to login page after logout
+    }
+
+    document.addEventListener("keydown", (event) => {
+        const directions = {ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right"};
+        if (directions[event.key]) {
+            move(directions[event.key]);
+        }
+    });
+
+    fetchMaze();
+</script>
 </body>
 
 </html>

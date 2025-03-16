@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>DarkMaze 登入</title>
     <style>
         body {
@@ -58,48 +58,48 @@
 </head>
 
 <body>
-    <h1>DarkMaze 登入</h1>
-    <div class="login-container">
-        <input type="text" id="username" placeholder="輸入使用者名稱">
-        <button onclick="login()">登入</button>
-    </div>
-    <script>
-        async function login() {
-            const username = document.getElementById("username").value.trim();
-            if (!username) {
-                alert("請輸入使用者名稱");
-                return;
-            }
-
-            const response = await fetch("http://127.0.0.1:8000/api/v1/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username})
-            });
-
-            if (!response.ok) {
-                alert("登入失敗");
-                return;
-            }
-
-            const data = await response.json();
-            if (data.cookies) {
-                data.cookies.forEach(cookie => {
-                    document.cookie = `${cookie.name}=${cookie.value}; expires=${new Date(cookie.expires).toUTCString()}; path=/`;
-                });
-            }
-
-            if (data.status) {
-                window.location.href = "/";
-            }
+<h1>DarkMaze 登入</h1>
+<div class="login-container">
+    <input id="username" placeholder="輸入使用者名稱" type="text">
+    <button onclick="login()">登入</button>
+</div>
+<script>
+    async function login() {
+        const username = document.getElementById("username").value.trim();
+        if (!username) {
+            alert("請輸入使用者名稱");
+            return;
         }
 
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                login();
-            }
+        const response = await fetch("http://127.0.0.1:8000/api/v1/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username})
         });
-    </script>
+
+        if (!response.ok) {
+            alert("登入失敗");
+            return;
+        }
+
+        const data = await response.json();
+        if (data.cookies) {
+            data.cookies.forEach(cookie => {
+                document.cookie = `${cookie.name}=${cookie.value}; expires=${new Date(cookie.expires).toUTCString()}; path=/`;
+            });
+        }
+
+        if (data.status) {
+            window.location.href = "/";
+        }
+    }
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            login();
+        }
+    });
+</script>
 </body>
 
 </html>

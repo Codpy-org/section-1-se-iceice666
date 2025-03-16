@@ -1,8 +1,9 @@
-import sqlite3
 import json
+import sqlite3
 
 conn = sqlite3.connect("game.db")
 cursor = conn.cursor()
+
 
 def create_user(username):
     """Create user and initialize game state"""
@@ -15,6 +16,7 @@ def create_user(username):
         print(f"User {username} has been created and game state initialized!")
     except sqlite3.IntegrityError:
         print(f"User {username} already exists, no need to create!")
+
 
 def reset_game_state(username):
     """Reset game state (if user exists, reset their state)"""
@@ -33,6 +35,7 @@ def reset_game_state(username):
     else:
         print(f"User {username} does not exist, please create an account first!")
 
+
 def save_game_state(username, current_level_name, map_size, health, path, current_position):
     """Update game state (if user exists, update their state)"""
     cursor.execute("SELECT id FROM game_state WHERE username = ?", (username,))
@@ -44,17 +47,19 @@ def save_game_state(username, current_level_name, map_size, health, path, curren
             UPDATE game_state 
             SET current_level_name = ?, map_size = ?, health = ?, path = ?, current_position = ?
             WHERE username = ?
-        """, (current_level_name, json.dumps(map_size), health, json.dumps(path), json.dumps(current_position), username))
+        """, (
+        current_level_name, json.dumps(map_size), health, json.dumps(path), json.dumps(current_position), username))
         conn.commit()
         print(f"Game state updated! (User: {username})")
     else:
         print(f"User {username} does not exist, please create an account first!")
 
+
 def get_latest_game_state(username):
     """Query the latest game state for the given username"""
     cursor.execute("SELECT * FROM game_state WHERE username = ?", (username,))
     result = cursor.fetchone()
-    
+
     if result:
         game_state = {
             "username": result[1],

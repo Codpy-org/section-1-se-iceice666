@@ -1,12 +1,13 @@
-from ..database.operation import save_game_state
 from .judge import hit_obstacle, game_over, arrive_at_destination
+from ..database.operation import save_game_state
+
 
 def move_location(game_state, direction):
     if game_over(game_state["health"]):
         return game_state
-    
+
     x, y = game_state["current_position"]
-    
+
     # Update position based on direction
     if direction == "up" and y > 0:
         y -= 1

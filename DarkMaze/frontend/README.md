@@ -1,1 +1,2 @@
-The "src" folder is where the code is stored, and you should go in and refactor it. The "tests" folder is where the test files are stored, and you should go in and complete the test writing. The Dockerfile also needs to be completed.
+The "src" folder is where the code is stored, and you should go in and refactor it. The "tests" folder is where the test
+files are stored, and you should go in and complete the test writing. The Dockerfile also needs to be completed.
