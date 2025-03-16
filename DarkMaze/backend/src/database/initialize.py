@@ -2,10 +2,11 @@ import sqlite3
 
 
 def initialize():
+    """Initialize the database and create necessary tables if they don't exist."""
     conn = sqlite3.connect("game.db")
     cursor = conn.cursor()
 
-    # Create game_state table (with username column)
+    # Create game_state table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS game_state (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,13 +19,5 @@ def initialize():
     )
     """)
 
-    conn.commit()
-    conn.close()
-    conn = sqlite3.connect("game.db")
-    cursor = conn.cursor()
-    conn.commit()
-    conn.close()
-    conn = sqlite3.connect("game.db")
-    cursor = conn.cursor()
     conn.commit()
     conn.close()

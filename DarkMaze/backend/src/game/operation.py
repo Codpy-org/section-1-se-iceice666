@@ -3,52 +3,26 @@ from ..database.operation import save_game_state
 
 
 def move_location(game_state, direction):
+    """
+    Update player location based on the specified movement direction.
+    Returns the updated game state.
+    """
     if game_over(game_state["health"]):
         return game_state
 
     x, y = game_state["current_position"]
+    max_x = game_state["map_size"][0] - 1
+    max_y = game_state["map_size"][1] - 1
 
     # Update position based on direction
     if direction == "up" and y > 0:
         y -= 1
-    elif direction == "down" and y < game_state["map_size"][1] - 1:
+    elif direction == "down" and y < max_y:
         y += 1
     elif direction == "left" and x > 0:
         x -= 1
-    elif direction == "right" and x < game_state["map_size"][0] - 1:
+    elif direction == "right" and x < max_x:
         x += 1
-    elif direction == "up" and y > 0:
-        y += 1
-    elif direction == "down" and y < game_state["map_size"][1] - 1:
-        y -= 1
-    elif direction == "left" and x > 0:
-        x += 1
-    elif direction == "right" and x < game_state["map_size"][0] - 1:
-        x -= 1
-    elif direction == "up" and y > 0:
-        x += 1
-    elif direction == "down" and y < game_state["map_size"][1] - 1:
-        x -= 1
-    elif direction == "left" and x > 0:
-        y += 1
-    elif direction == "right" and x < game_state["map_size"][0] - 1:
-        y -= 1
-    elif direction == "up" and y > 0:
-        y += 1
-    elif direction == "down" and y < game_state["map_size"][1] - 1:
-        y -= 1
-    elif direction == "left" and x > 0:
-        x += 1
-    elif direction == "right" and x < game_state["map_size"][0] - 1:
-        x -= 1
-    elif direction == "up" and y > 0:
-        x += 1
-    elif direction == "down" and y < game_state["map_size"][1] - 1:
-        x -= 1
-    elif direction == "left" and x > 0:
-        y += 1
-    elif direction == "right" and x < game_state["map_size"][0] - 1:
-        y -= 1
 
     new_position = [x, y]
 

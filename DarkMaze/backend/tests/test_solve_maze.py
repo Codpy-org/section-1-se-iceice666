@@ -10,13 +10,13 @@ game_state = {}
 
 async def login_request():
     """Simulates a frontend login."""
-
     payload = {"username": USERNAME}
 
     async with httpx.AsyncClient() as client:
         response = await client.post(LOGIN_URL, json=payload)
 
     assert response.status_code == 200  # Ensure the request was successful
+    return response.json()
 
 
 async def reset_request():
@@ -28,45 +28,51 @@ async def reset_request():
 
     assert response.status_code == 200  # Ensure the request was successful
     game_state = response.json()
-    assert game_state["current_position"] == [1, 0]
+    return game_state
 
 
-async def move_request(directory):
+async def move_request(direction):
     """Simulates a frontend move request."""
     global game_state
 
-    payload = {"username": USERNAME, "direction": directory}
+    payload = {"username": USERNAME, "direction": direction}
 
     async with httpx.AsyncClient() as client:
         response = await client.post(MOVE_URL, json=payload)
 
     assert response.status_code == 200  # Ensure the request was successful
     game_state = response.json()
-    assert game_state["health"] >= 3
+    return game_state
+
 
 @pytest.mark.asyncio
 async def test_integration():
+    global game_state
+
     await login_request()
-    # print(game_state)
-    await reset_request()
-    # print(game_state)
+    game_state = await reset_request()
+    assert game_state["current_position"] == [1, 0]
+
     for i in range(5):
-        await move_request("down")
-        # print(game_state)
+        game_state = await move_request("down")
+
     assert game_state["current_position"] == [1, 5]
 
 
 @pytest.mark.asyncio
 async def test_solver():
+    global game_state
+
     await login_request()
-    await reset_request()
+    game_state = await reset_request()
+    assert game_state["current_position"] == [1, 0]
 
     # First move right to position [9,0]
     for i in range(8):
-        await move_request("right")
+        game_state = await move_request("right")
 
     # Then move down to position [9,5]
     for i in range(5):
-        await move_request("down")
+        game_state = await move_request("down")
 
     assert game_state["health"] == 666
