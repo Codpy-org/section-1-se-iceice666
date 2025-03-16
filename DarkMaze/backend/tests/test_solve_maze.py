@@ -67,30 +67,34 @@ async def test_solver():
     game_state = await reset_request()
     assert game_state["current_position"] == [1, 0]
 
-    game_state = await move_request("down")
-    game_state = await move_request("down")
-    game_state = await move_request("down")
-    game_state = await move_request("down")
-    game_state = await move_request("down")
+    move_sequence = [
+     "down"
+    ,"down"
+    ,"down"
+    ,"down"
+    ,"down"
 
-    game_state = await move_request("right")
-    game_state = await move_request("down")
-    game_state = await move_request("right")
-    game_state = await move_request("right")
+    ,"right"
+    ,"down"
+    ,"right"
+    ,"right"
 
-    game_state = await move_request("up")
-    game_state = await move_request("up")
-    game_state = await move_request("up")
-    game_state = await move_request("up")
+    ,"up"
+    ,"up"
+    ,"up"
+    ,"up"
 
-    game_state = await move_request("right")
-    game_state = await move_request("right")
-    game_state = await move_request("down")
-    game_state = await move_request("right")
-    game_state = await move_request("right")
-    game_state = await move_request("down")
-    game_state = await move_request("right")
-    game_state = await move_request("down")
+    ,"right"
+    ,"right"
+    ,"down"
+    ,"right"
+    ,"right"
+    ,"down"
+    ,"right"
+    ,"down"
+    ]
 
+    for move in move_sequence:
+        game_state = await move_request(move)
 
     assert game_state["health"] == 666
