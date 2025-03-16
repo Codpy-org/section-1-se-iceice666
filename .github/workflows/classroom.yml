@@ -561,6 +561,7 @@ jobs:
           echo "----------------------------"
           echo "🛠  Reliability Rating: $RELIABILITY"
           echo "🛡  Security Rating: $SECURITY"
+          echo "🛡  Security Review Rating: $SECURITY_REVIEW"
           echo "🔧  Maintainability Rating: $MAINTAINABILITY"
           echo "🐛  Bugs: $BUGS"
           echo "🚨  Vulnerabilities: $VULNERABILITIES"
